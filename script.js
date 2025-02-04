@@ -1,3 +1,41 @@
+let map;
+let marker;
+let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
+let selectedLng = 38.43791868793516;
+
+// Инициализация карты
+function initMap() {
+    map = L.map('map').setView([selectedLat, selectedLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Добавление маркера
+    marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
+
+    // Обновление координат при перемещении маркера
+    marker.on('dragend', function (event) {
+        const position = marker.getLatLng();
+        selectedLat = position.lat;
+        selectedLng = position.lng;
+        console.log("Новые координаты:", selectedLat, selectedLng);
+    });
+
+    // Обновление координат при клике на карту
+    map.on('click', function (event) {
+        const { lat, lng } = event.latlng;
+        selectedLat = lat;
+        selectedLng = lng;
+        marker.setLatLng([lat, lng]);
+        console.log("Новые координаты:", selectedLat, selectedLng);
+    });
+}
+
+// Инициализация карты при загрузке страницы
+document.addEventListener("DOMContentLoaded", initMap);
+
+// Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
     const apiUrl = "https://local-business-data.p.rapidapi.com/search";
     const headers = {
@@ -9,8 +47,8 @@ document.getElementById("fetchData").addEventListener("click", async () => {
         limit: "5",
         region: "ru",
         language: "ru",
-        lat: "55.808234713666174",
-        lng: "38.43791868793516",
+        lat: selectedLat,
+        lng: selectedLng,
         zoom: "13"
     };
 
@@ -23,6 +61,7 @@ document.getElementById("fetchData").addEventListener("click", async () => {
     }
 });
 
+// Функция для отображения результатов
 function displayResults(results) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
@@ -82,6 +121,7 @@ function displayResults(results) {
     resultsDiv.appendChild(table);
 }
 
+// Функция для определения типа учреждения
 function determineType(name) {
     const nameLower = name.toLowerCase();
     if (nameLower.includes("школа") || nameLower.includes("гимназия") || nameLower.includes("лицей")) {
