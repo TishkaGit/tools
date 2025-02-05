@@ -1,1 +1,1 @@
-[# tools](https://tishkagit.github.io/tools/)
+(https://tishkagit.github.io/tools/)
