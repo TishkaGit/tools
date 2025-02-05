@@ -11,6 +11,15 @@
     <div class="container">
         <h1>Поиск школ и детских садов</h1>
         <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+        
+        <!-- Поле ввода радиуса и кнопка -->
+        <div class="radius-control">
+            <label for="radius">Радиус поиска (км):</label>
+            <input type="number" id="radius" min="1" max="50" value="5">
+            <button id="applyRadius">Применить радиус</button>
+            <p id="error" style="color: red; display: none;"></p>
+        </div>
+
         <button id="fetchData">Получить данные</button>
         <div id="results"></div>
     </div>
