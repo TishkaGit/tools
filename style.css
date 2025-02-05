@@ -53,3 +53,29 @@ th {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+.radius-control {
+    margin-bottom: 20px;
+}
+
+.radius-control label {
+    margin-right: 10px;
+}
+
+.radius-control input {
+    padding: 5px;
+    width: 100px;
+    margin-right: 10px;
+}
+
+.radius-control button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.radius-control button:hover {
+    background-color: #0056b3;
+}
