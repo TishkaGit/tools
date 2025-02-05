@@ -2,10 +2,11 @@ let map;
 let marker;
 let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
 let selectedLng = 38.43791868793516;
+let currentZoom = 13; // Начальный уровень зума
 
 // Инициализация карты
 function initMap() {
-    map = L.map('map').setView([selectedLat, selectedLng], 13);
+    map = L.map('map').setView([selectedLat, selectedLng], currentZoom);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -35,6 +36,47 @@ function initMap() {
 // Инициализация карты при загрузке страницы
 document.addEventListener("DOMContentLoaded", initMap);
 
+// Функция для применения радиуса
+document.getElementById("applyRadius").addEventListener("click", () => {
+    const radiusInput = document.getElementById("radius");
+    const errorElement = document.getElementById("error");
+    const radius = parseFloat(radiusInput.value);
+
+    // Проверка на ввод нуля или отрицательного значения
+    if (radius <= 0) {
+        errorElement.textContent = "Ошибка: радиус должен быть больше нуля.";
+        errorElement.style.display = "block";
+        return;
+    }
+
+    // Проверка на ввод слишком большого значения (>50 км)
+    if (radius > 50) {
+        errorElement.textContent = "Ошибка: радиус не может быть больше 50 км.";
+        errorElement.style.display = "block";
+        return;
+    }
+
+    // Скрыть сообщение об ошибке, если оно было показано
+    errorElement.style.display = "none";
+
+    // Преобразование радиуса в уровень зума
+    currentZoom = radiusToZoom(radius);
+    map.setZoom(currentZoom); // Обновление зума карты
+    console.log("Установлен радиус:", radius, "км, zoom:", currentZoom);
+});
+
+// Функция для преобразования радиуса в уровень зума
+function radiusToZoom(radius) {
+    // Эмпирическая формула для преобразования радиуса в zoom
+    if (radius <= 1) return 15;
+    if (radius <= 2) return 14;
+    if (radius <= 5) return 13;
+    if (radius <= 10) return 12;
+    if (radius <= 20) return 11;
+    if (radius <= 50) return 10;
+    return 10; // Минимальный zoom для больших радиусов
+}
+
 // Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
     const apiUrl = "https://local-business-data.p.rapidapi.com/search";
@@ -49,7 +91,7 @@ document.getElementById("fetchData").addEventListener("click", async () => {
         language: "ru",
         lat: selectedLat,
         lng: selectedLng,
-        zoom: "13"
+        zoom: currentZoom // Используем текущий уровень зума
     };
 
     try {
