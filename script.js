@@ -84,9 +84,14 @@ document.getElementById("fetchData").addEventListener("click", async () => {
         "x-rapidapi-key": "93c2e38741mshcc05d99b12d83f8p1bc802jsn90e46c100107",
         "x-rapidapi-host": "local-business-data.p.rapidapi.com"
     };
+
+    // Получаем значение количества школ
+    const limitInput = document.getElementById("limit");
+    const limit = limitInput.value;
+
     const params = {
         query: "school OR kindergarten OR camp OR лагерь",
-        limit: "5",
+        limit: limit, // Используем выбранное количество школ
         region: "ru",
         language: "ru",
         lat: selectedLat,
@@ -98,10 +103,34 @@ document.getElementById("fetchData").addEventListener("click", async () => {
         const response = await fetch(`${apiUrl}?${new URLSearchParams(params)}`, { headers });
         const data = await response.json();
         displayResults(data.data);
+        exportToCSV(data.data); // Экспорт данных в CSV
     } catch (error) {
         console.error("Ошибка при запросе к API:", error);
     }
 });
+
+// Функция для экспорта данных в CSV
+function exportToCSV(data) {
+    const csvContent = "data:text/csv;charset=utf-8," +
+        "Название,Адрес,Телефон,Email,Сайт,Тип,Город\n" +
+        data.map(item => [
+            `"${item.name}"`,
+            `"${item.full_address || "Не указан"}"`,
+            `"${item.phone || "Не указан"}"`,
+            `"${item.email || "Не указан"}"`,
+            `"${item.website || "Не указан"}"`,
+            `"${determineType(item.name)}"`,
+            `"${item.city || "Не указан"}"`
+        ].join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "schools_and_kindergartens.csv");
+    document.body.appendChild(link);
+    link.click(); // Автоматическое скачивание файла
+    document.body.removeChild(link);
+}
 
 // Функция для отображения результатов
 function displayResults(results) {
