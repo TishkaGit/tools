@@ -79,3 +79,16 @@ th {
 .radius-control button:hover {
     background-color: #0056b3;
 }
+.limit-control {
+    margin-bottom: 20px;
+}
+
+.limit-control label {
+    margin-right: 10px;
+}
+
+.limit-control input {
+    padding: 5px;
+    width: 100px;
+    margin-right: 10px;
+}
