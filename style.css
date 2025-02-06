@@ -92,3 +92,17 @@ th {
     width: 100px;
     margin-right: 10px;
 }
+#downloadCSV {
+    background-color: #6c757d; /* Серый цвет по умолчанию */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: not-allowed; /* Курсор "недоступно" */
+    margin-left: 10px;
+}
+
+#downloadCSV:not(:disabled) {
+    background-color: #28a745; /* Зеленый цвет, когда кнопка активна */
+    cursor: pointer; /* Курсор "указатель" */
+}
