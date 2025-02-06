@@ -1,7 +1,7 @@
 let map;
 let marker;
-let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
-let selectedLng = 38.43791868793516;
+let selectedLat = 61.663894; // Начальные координаты (по умолчанию)
+let selectedLng = 50.816212;
 let currentZoom = 13; // Начальный уровень зума
 let currentData = []; // Для хранения данных
 
