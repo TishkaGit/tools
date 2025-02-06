@@ -13,22 +13,29 @@
         <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
         
         <!-- Поле ввода радиуса и кнопка -->
-        <div class="radius-control">
-            <label for="radius">Радиус поиска (км):</label>
-            <input type="number" id="radius" min="1" max="50" value="5">
-            <button id="applyRadius">Применить радиус</button>
-            <p id="error" style="color: red; display: none;"></p>
+        <div class="controls">
+            <div class="control-group">
+                <label for="radius">Радиус поиска (км):</label>
+                <input type="number" id="radius" min="1" max="50" value="5">
+                <button id="applyRadius">Применить радиус</button>
+            </div>
+
+            <!-- Поле ввода количества школ -->
+            <div class="control-group">
+                <label for="limit">Количество школ:</label>
+                <input type="number" id="limit" min="1" max="50" value="5">
+                <button id="applyLimit">Применить количество</button>
+            </div>
         </div>
 
-        <!-- Поле ввода количества школ -->
-        <div class="limit-control">
-            <label for="limit">Количество школ:</label>
-            <input type="number" id="limit" min="1" max="50" value="5">
-        </div>
+        <p id="error" style="color: red; display: none;"></p>
 
         <!-- Кнопки -->
-        <button id="fetchData">Получить данные</button>
-        <button id="downloadCSV" disabled>Скачать CSV</button>
+        <div class="buttons">
+            <button id="fetchData">Получить данные</button>
+            <button id="downloadCSV" disabled>Скачать CSV</button>
+        </div>
+
         <div id="results"></div>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
