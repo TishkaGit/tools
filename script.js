@@ -1,7 +1,7 @@
 let map;
 let marker;
-let selectedLat = 61.663894; // Начальные координаты (по умолчанию)
-let selectedLng = 50.816212;
+let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
+let selectedLng = 38.43791868793516;
 let currentZoom = 13; // Начальный уровень зума
 let currentData = []; // Для хранения данных
 
@@ -38,7 +38,45 @@ function initMap() {
 document.addEventListener("DOMContentLoaded", initMap);
 
 // Функция для применения радиуса
-document.getElementById("applyRadius").addEventListener("click", () => {
+document.getElementById("applyRadius").addEventListener("click", applyRadius);
+
+// Функция для применения количества школ
+document.getElementById("applyLimit").addEventListener("click", applyLimit);
+
+// Функция для изменения радиуса колесом мыши
+document.getElementById("radius").addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const radiusInput = document.getElementById("radius");
+    let radius = parseFloat(radiusInput.value);
+
+    if (event.deltaY < 0) {
+        radius = Math.min(radius + 1, 50); // Увеличить радиус
+    } else {
+        radius = Math.max(radius - 1, 1); // Уменьшить радиус
+    }
+
+    radiusInput.value = radius;
+    applyRadius();
+});
+
+// Функция для изменения количества школ колесом мыши
+document.getElementById("limit").addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const limitInput = document.getElementById("limit");
+    let limit = parseFloat(limitInput.value);
+
+    if (event.deltaY < 0) {
+        limit = Math.min(limit + 1, 50); // Увеличить количество
+    } else {
+        limit = Math.max(limit - 1, 1); // Уменьшить количество
+    }
+
+    limitInput.value = limit;
+    applyLimit();
+});
+
+// Функция для применения радиуса
+function applyRadius() {
     const radiusInput = document.getElementById("radius");
     const errorElement = document.getElementById("error");
     const radius = parseFloat(radiusInput.value);
@@ -64,7 +102,14 @@ document.getElementById("applyRadius").addEventListener("click", () => {
     currentZoom = radiusToZoom(radius);
     map.setZoom(currentZoom); // Обновление зума карты
     console.log("Установлен радиус:", radius, "км, zoom:", currentZoom);
-});
+}
+
+// Функция для применения количества школ
+function applyLimit() {
+    const limitInput = document.getElementById("limit");
+    const limit = parseFloat(limitInput.value);
+    console.log("Установлено количество школ:", limit);
+}
 
 // Функция для преобразования радиуса в уровень зума
 function radiusToZoom(radius) {
@@ -126,7 +171,9 @@ document.getElementById("downloadCSV").addEventListener("click", () => {
 
 // Функция для экспорта данных в CSV
 function exportToCSV(data) {
+    const BOM = "\uFEFF"; // Добавляем BOM для правильной кодировки
     const csvContent = "data:text/csv;charset=utf-8," +
+        BOM +
         "Название,Адрес,Телефон,Email,Сайт,Тип,Город\n" +
         data.map(item => [
             `"${item.name}"`,
