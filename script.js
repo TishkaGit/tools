@@ -3,6 +3,7 @@ let marker;
 let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
 let selectedLng = 38.43791868793516;
 let currentZoom = 13; // Начальный уровень зума
+let currentData = []; // Для хранения данных
 
 // Инициализация карты
 function initMap() {
@@ -102,11 +103,25 @@ document.getElementById("fetchData").addEventListener("click", async () => {
     try {
         const response = await fetch(`${apiUrl}?${new URLSearchParams(params)}`, { headers });
         const data = await response.json();
-        displayResults(data.data);
-        exportToCSV(data.data); // Экспорт данных в CSV
+        currentData = data.data; // Сохраняем данные
+        displayResults(currentData);
+
+        // Активируем кнопку "Скачать CSV"
+        const downloadButton = document.getElementById("downloadCSV");
+        downloadButton.disabled = false;
+        downloadButton.style.backgroundColor = "#28a745"; // Зеленый цвет
     } catch (error) {
         console.error("Ошибка при запросе к API:", error);
     }
+});
+
+// Функция для скачивания CSV
+document.getElementById("downloadCSV").addEventListener("click", () => {
+    if (currentData.length === 0) {
+        alert("Нет данных для скачивания.");
+        return;
+    }
+    exportToCSV(currentData);
 });
 
 // Функция для экспорта данных в CSV
