@@ -1,5 +1,6 @@
 let map;
 let marker;
+let circle; // Круг для отображения радиуса
 let selectedLat = 55.808234713666174; // Начальные координаты (по умолчанию)
 let selectedLng = 38.43791868793516;
 let currentZoom = 13; // Начальный уровень зума
@@ -16,11 +17,22 @@ function initMap() {
     // Добавление маркера
     marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
 
+    // Добавление круга для отображения радиуса
+    const radiusInput = document.getElementById("radius");
+    const radius = parseFloat(radiusInput.value) * 1000; // Переводим км в метры
+    circle = L.circle([selectedLat, selectedLng], {
+        radius: radius,
+        color: '#007bff',
+        fillColor: '#007bff',
+        fillOpacity: 0.2
+    }).addTo(map);
+
     // Обновление координат при перемещении маркера
     marker.on('dragend', function (event) {
         const position = marker.getLatLng();
         selectedLat = position.lat;
         selectedLng = position.lng;
+        updateCircle(); // Обновляем круг
         console.log("Новые координаты:", selectedLat, selectedLng);
     });
 
@@ -30,12 +42,21 @@ function initMap() {
         selectedLat = lat;
         selectedLng = lng;
         marker.setLatLng([lat, lng]);
+        updateCircle(); // Обновляем круг
         console.log("Новые координаты:", selectedLat, selectedLng);
     });
 }
 
 // Инициализация карты при загрузке страницы
 document.addEventListener("DOMContentLoaded", initMap);
+
+// Функция для обновления круга
+function updateCircle() {
+    const radiusInput = document.getElementById("radius");
+    const radius = parseFloat(radiusInput.value) * 1000; // Переводим км в метры
+    circle.setLatLng([selectedLat, selectedLng]);
+    circle.setRadius(radius);
+}
 
 // Функция для применения радиуса
 document.getElementById("applyRadius").addEventListener("click", applyRadius);
@@ -101,6 +122,7 @@ function applyRadius() {
     // Преобразование радиуса в уровень зума
     currentZoom = radiusToZoom(radius);
     map.setZoom(currentZoom); // Обновление зума карты
+    updateCircle(); // Обновляем круг
     console.log("Установлен радиус:", radius, "км, zoom:", currentZoom);
 }
 
@@ -121,6 +143,19 @@ function radiusToZoom(radius) {
     if (radius <= 20) return 11;
     if (radius <= 50) return 10;
     return 10; // Минимальный zoom для больших радиусов
+}
+
+// Функция для расчета расстояния между двумя точками (в км)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Радиус Земли в км
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Расстояние в км
 }
 
 // Функция для получения данных
@@ -234,11 +269,13 @@ function displayResults(results) {
             <th>Сайт</th>
             <th>Тип</th>
             <th>Город</th>
+            <th>Расстояние (км)</th>
         </tr>
     `;
 
     filteredResults.forEach(result => {
         const row = document.createElement("tr");
+        const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude).toFixed(2);
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
@@ -247,6 +284,7 @@ function displayResults(results) {
             <td>${result.website || "Не указан"}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
+            <td>${distance}</td>
         `;
         table.appendChild(row);
     });
