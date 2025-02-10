@@ -276,12 +276,13 @@ function displayResults(results) {
     filteredResults.forEach(result => {
         const row = document.createElement("tr");
         const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude).toFixed(2);
+        const website = result.website ? `<a href="${result.website}" target="_blank">${result.website}</a>` : "Не указан";
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
             <td>${result.phone || "Не указан"}</td>
             <td>${result.email || "Не указан"}</td>
-            <td>${result.website || "Не указан"}</td>
+            <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
             <td>${distance}</td>
