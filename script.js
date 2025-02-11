@@ -307,7 +307,6 @@ function displayResults(results) {
             <th>Тип</th>
             <th>Город</th>
             <th>Расстояние (км)</th>
-            <th>Направление</th>
         </tr>
     `;
 
@@ -320,6 +319,9 @@ function displayResults(results) {
         const azimuth = calculateAzimuth(selectedLat, selectedLng, result.latitude, result.longitude);
         const direction = getDirection(azimuth);
 
+        // Добавляем стрелочку направления после расстояния
+        const distanceWithArrow = `${distance} км ${direction.emoji}`;
+
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
@@ -328,8 +330,7 @@ function displayResults(results) {
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
-            <td>${distance}</td>
-            <td>${direction.emoji} ${direction.name}</td>
+            <td>${distanceWithArrow}</td>
         `;
         table.appendChild(row);
     });
