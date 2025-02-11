@@ -160,7 +160,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
-    const apiUrl = "https://local-business-search.p.rapidapi.com/search-nearby";
+    const apiUrl = "https://local-business-search.p.rapidapi.com/search-in-area";
     const headers = {
         "x-rapidapi-key": "93c2e38741mshcc05d99b12d83f8p1bc802jsn90e46c100107",
         "x-rapidapi-host": "local-business-search.p.rapidapi.com"
@@ -170,10 +170,16 @@ document.getElementById("fetchData").addEventListener("click", async () => {
     const limitInput = document.getElementById("limit");
     const limit = limitInput.value;
 
+    // Получаем радиус в километрах и переводим в метры
+    const radiusInput = document.getElementById("radius");
+    const radiusKm = parseFloat(radiusInput.value);
+    const radiusMeters = radiusKm * 1000; // Переводим км в метры
+
     const params = {
         query: "school OR kindergarten OR camp OR лагерь",
         lat: selectedLat,
         lng: selectedLng,
+        radius: radiusMeters, // Используем радиус в метрах
         limit: limit, // Используем выбранное количество школ
         language: "ru",
         region: "ru",
