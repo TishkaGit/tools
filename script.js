@@ -160,10 +160,10 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
-    const apiUrl = "https://local-business-data.p.rapidapi.com/search";
+    const apiUrl = "https://local-business-search.p.rapidapi.com/search-nearby";
     const headers = {
         "x-rapidapi-key": "93c2e38741mshcc05d99b12d83f8p1bc802jsn90e46c100107",
-        "x-rapidapi-host": "local-business-data.p.rapidapi.com"
+        "x-rapidapi-host": "local-business-search.p.rapidapi.com"
     };
 
     // Получаем значение количества школ
@@ -172,12 +172,12 @@ document.getElementById("fetchData").addEventListener("click", async () => {
 
     const params = {
         query: "school OR kindergarten OR camp OR лагерь",
-        limit: limit, // Используем выбранное количество школ
-        region: "ru",
-        language: "ru",
         lat: selectedLat,
         lng: selectedLng,
-        zoom: currentZoom // Используем текущий уровень зума
+        limit: limit, // Используем выбранное количество школ
+        language: "ru",
+        region: "ru",
+        extract_emails_and_contacts: "true" // Включаем извлечение email и телефонов
     };
 
     try {
@@ -194,77 +194,6 @@ document.getElementById("fetchData").addEventListener("click", async () => {
         console.error("Ошибка при запросе к API:", error);
     }
 });
-
-// Функция для скачивания CSV
-document.getElementById("downloadCSV").addEventListener("click", () => {
-    if (currentData.length === 0) {
-        alert("Нет данных для скачивания.");
-        return;
-    }
-    exportToCSV(currentData);
-});
-
-// Функция для экспорта данных в CSV
-function exportToCSV(data) {
-    const BOM = "\uFEFF"; // Добавляем BOM для правильной кодировки
-    const csvContent = "data:text/csv;charset=utf-8," +
-        BOM +
-        "Название,Адрес,Телефон,Email,Сайт,Тип,Город\n" +
-        data.map(item => [
-            `"${item.name}"`,
-            `"${item.full_address || "Не указан"}"`,
-            `"${item.phone || "Не указан"}"`,
-            `"${item.email || "Не указан"}"`,
-            `"${item.website || "Не указан"}"`,
-            `"${determineType(item.name)}"`,
-            `"${item.city || "Не указан"}"`
-        ].join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "schools_and_kindergartens.csv");
-    document.body.appendChild(link);
-    link.click(); // Автоматическое скачивание файла
-    document.body.removeChild(link);
-}
-
-// Функция для расчета азимута между двумя точками
-function calculateAzimuth(lat1, lon1, lat2, lon2) {
-    const lat1Rad = lat1 * (Math.PI / 180);
-    const lon1Rad = lon1 * (Math.PI / 180);
-    const lat2Rad = lat2 * (Math.PI / 180);
-    const lon2Rad = lon2 * (Math.PI / 180);
-
-    const dLon = lon2Rad - lon1Rad;
-    const y = Math.sin(dLon) * Math.cos(lat2Rad);
-    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
-    const azimuth = Math.atan2(y, x) * (180 / Math.PI);
-
-    return (azimuth + 360) % 360; // Нормализуем азимут в диапазоне [0, 360)
-}
-
-// Функция для определения направления по азимуту
-function getDirection(azimuth) {
-    const directions = [
-        { range: [0, 22.5], emoji: "⬆️", name: "Север" },
-        { range: [22.5, 67.5], emoji: "↗️", name: "Северо-Восток" },
-        { range: [67.5, 112.5], emoji: "➡️", name: "Восток" },
-        { range: [112.5, 157.5], emoji: "↘️", name: "Юго-Восток" },
-        { range: [157.5, 202.5], emoji: "⬇️", name: "Юг" },
-        { range: [202.5, 247.5], emoji: "↙️", name: "Юго-Запад" },
-        { range: [247.5, 292.5], emoji: "⬅️", name: "Запад" },
-        { range: [292.5, 337.5], emoji: "↖️", name: "Северо-Запад" },
-        { range: [337.5, 360], emoji: "⬆️", name: "Север" }
-    ];
-
-    for (const dir of directions) {
-        if (azimuth >= dir.range[0] && azimuth < dir.range[1]) {
-            return dir;
-        }
-    }
-    return { emoji: "⬆️", name: "Север" }; // По умолчанию
-}
 
 // Функция для отображения результатов
 function displayResults(results) {
@@ -322,11 +251,15 @@ function displayResults(results) {
         // Добавляем стрелочку направления после расстояния
         const distanceWithArrow = `${distance} км ${direction.emoji}`;
 
+        // Получаем телефон и email из данных API
+        const phone = result.phone || "Не указан";
+        const email = result.email || "Не указан";
+
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
-            <td>${result.phone || "Не указан"}</td>
-            <td>${result.email || "Не указан"}</td>
+            <td>${phone}</td>
+            <td>${email}</td>
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
