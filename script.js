@@ -158,11 +158,48 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Расстояние в км
 }
 
+// Функция для расчета азимута между двумя точками
+function calculateAzimuth(lat1, lon1, lat2, lon2) {
+    const lat1Rad = lat1 * (Math.PI / 180);
+    const lon1Rad = lon1 * (Math.PI / 180);
+    const lat2Rad = lat2 * (Math.PI / 180);
+    const lon2Rad = lon2 * (Math.PI / 180);
+
+    const dLon = lon2Rad - lon1Rad;
+    const y = Math.sin(dLon) * Math.cos(lat2Rad);
+    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+    const azimuth = Math.atan2(y, x) * (180 / Math.PI);
+
+    return (azimuth + 360) % 360; // Нормализуем азимут в диапазоне [0, 360)
+}
+
+// Функция для определения направления по азимуту
+function getDirection(azimuth) {
+    const directions = [
+        { range: [0, 22.5], emoji: "⬆️", name: "Север" },
+        { range: [22.5, 67.5], emoji: "↗️", name: "Северо-Восток" },
+        { range: [67.5, 112.5], emoji: "➡️", name: "Восток" },
+        { range: [112.5, 157.5], emoji: "↘️", name: "Юго-Восток" },
+        { range: [157.5, 202.5], emoji: "⬇️", name: "Юг" },
+        { range: [202.5, 247.5], emoji: "↙️", name: "Юго-Запад" },
+        { range: [247.5, 292.5], emoji: "⬅️", name: "Запад" },
+        { range: [292.5, 337.5], emoji: "↖️", name: "Северо-Запад" },
+        { range: [337.5, 360], emoji: "⬆️", name: "Север" }
+    ];
+
+    for (const dir of directions) {
+        if (azimuth >= dir.range[0] && azimuth < dir.range[1]) {
+            return dir;
+        }
+    }
+    return { emoji: "⬆️", name: "Север" }; // По умолчанию
+}
+
 // Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
     const apiUrl = "https://local-business-data.p.rapidapi.com/search";
     const headers = {
-        "x-rapidapi-key": "ad55ac066emshfbfeb2df67cde49p17f4fcjsnee711253aa4f",
+        "x-rapidapi-key": "ad55ac066emshfbfeb2df67cde49p17f4fcjsnee711253aa4f", // Новый API-ключ
         "x-rapidapi-host": "local-business-data.p.rapidapi.com"
     };
 
@@ -228,6 +265,7 @@ function exportToCSV(data) {
     link.click(); // Автоматическое скачивание файла
     document.body.removeChild(link);
 }
+
 // Функция для отображения результатов
 function displayResults(results) {
     const resultsDiv = document.getElementById("results");
@@ -308,7 +346,5 @@ function determineType(name) {
     } else if (nameLower.includes("детский сад") || nameLower.includes("сад")) {
         return "Сад";
     } else if (nameLower.includes("лагерь")) {
-        return "Лагерь";
-    }
-    return "Неизвестно";
+        return "Неизвестно";
 }
