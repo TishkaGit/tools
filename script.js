@@ -160,30 +160,24 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 // Функция для получения данных
 document.getElementById("fetchData").addEventListener("click", async () => {
-    const apiUrl = "https://local-business-search.p.rapidapi.com/search-in-area";
+    const apiUrl = "https://local-business-data.p.rapidapi.com/search";
     const headers = {
         "x-rapidapi-key": "93c2e38741mshcc05d99b12d83f8p1bc802jsn90e46c100107",
-        "x-rapidapi-host": "local-business-search.p.rapidapi.com"
+        "x-rapidapi-host": "local-business-data.p.rapidapi.com"
     };
 
     // Получаем значение количества школ
     const limitInput = document.getElementById("limit");
     const limit = limitInput.value;
 
-    // Получаем радиус в километрах и переводим в метры
-    const radiusInput = document.getElementById("radius");
-    const radiusKm = parseFloat(radiusInput.value);
-    const radiusMeters = radiusKm * 1000; // Переводим км в метры
-
     const params = {
         query: "school OR kindergarten OR camp OR лагерь",
+        limit: limit, // Используем выбранное количество школ
+        region: "ru",
+        language: "ru",
         lat: selectedLat,
         lng: selectedLng,
-        radius: radiusMeters, // Используем радиус в метрах
-        limit: limit, // Используем выбранное количество школ
-        language: "ru",
-        region: "ru",
-        extract_emails_and_contacts: "true" // Включаем извлечение email и телефонов
+        zoom: currentZoom // Используем текущий уровень зума
     };
 
     try {
@@ -201,6 +195,39 @@ document.getElementById("fetchData").addEventListener("click", async () => {
     }
 });
 
+// Функция для скачивания CSV
+document.getElementById("downloadCSV").addEventListener("click", () => {
+    if (currentData.length === 0) {
+        alert("Нет данных для скачивания.");
+        return;
+    }
+    exportToCSV(currentData);
+});
+
+// Функция для экспорта данных в CSV
+function exportToCSV(data) {
+    const BOM = "\uFEFF"; // Добавляем BOM для правильной кодировки
+    const csvContent = "data:text/csv;charset=utf-8," +
+        BOM +
+        "Название,Адрес,Телефон,Email,Сайт,Тип,Город\n" +
+        data.map(item => [
+            `"${item.name}"`,
+            `"${item.full_address || "Не указан"}"`,
+            `"${item.phone || "Не указан"}"`,
+            `"${item.email || "Не указан"}"`,
+            `"${item.website || "Не указан"}"`,
+            `"${determineType(item.name)}"`,
+            `"${item.city || "Не указан"}"`
+        ].join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "schools_and_kindergartens.csv");
+    document.body.appendChild(link);
+    link.click(); // Автоматическое скачивание файла
+    document.body.removeChild(link);
+}
 // Функция для отображения результатов
 function displayResults(results) {
     const resultsDiv = document.getElementById("results");
