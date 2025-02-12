@@ -162,7 +162,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 document.getElementById("fetchData").addEventListener("click", async () => {
     const apiUrl = "https://local-business-data.p.rapidapi.com/search";
     const headers = {
-        "x-rapidapi-key": "93c2e38741mshcc05d99b12d83f8p1bc802jsn90e46c100107",
+        "x-rapidapi-key": "ad55ac066emshfbfeb2df67cde49p17f4fcjsnee711253aa4f",
         "x-rapidapi-host": "local-business-data.p.rapidapi.com"
     };
 
