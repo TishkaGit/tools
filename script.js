@@ -346,5 +346,7 @@ function determineType(name) {
     } else if (nameLower.includes("детский сад") || nameLower.includes("сад")) {
         return "Сад";
     } else if (nameLower.includes("лагерь")) {
-        return "Неизвестно";
+        return "Лагерь";
+    }
+    return "Неизвестно";
 }
