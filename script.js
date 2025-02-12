@@ -5,6 +5,8 @@ let selectedLat = 55.808234713666174; // Начальные координаты
 let selectedLng = 38.43791868793516;
 let currentZoom = 13; // Начальный уровень зума
 let currentData = []; // Для хранения данных
+let selectedParams = []; // Выбранные параметры поиска
+let availableParams = ["школа", "сад", "лагерь"]; // Доступные параметры
 
 // Инициализация карты
 function initMap() {
@@ -207,8 +209,11 @@ document.getElementById("fetchData").addEventListener("click", async () => {
     const limitInput = document.getElementById("limit");
     const limit = limitInput.value;
 
+    // Формируем запрос на основе выбранных параметров
+    const query = selectedParams.length > 0 ? selectedParams.join(" OR ") : "школа OR сад OR лагерь";
+
     const params = {
-        query: "school OR kindergarten OR camp OR лагерь",
+        query: query,
         limit: limit, // Используем выбранное количество школ
         region: "ru",
         language: "ru",
@@ -285,7 +290,7 @@ function displayResults(results) {
             "фотостудия", "фото", "альбом", "фотограф", "фотосъемка",
             "фотоуслуги", "фотосессия", "видеосъемка"
         ];
-        const includeWords = ["школа", "гимназия", "лицей", "детский сад", "сад", "лагерь"];
+        const includeWords = selectedParams.length > 0 ? selectedParams : ["школа", "сад", "лагерь"];
 
         return !excludeWords.some(word => name.includes(word)) &&
                includeWords.some(word => name.includes(word));
@@ -315,7 +320,7 @@ function displayResults(results) {
         const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude).toFixed(2);
         const website = result.website ? `<a href="${result.website}" target="_blank">${result.website}</a>` : "Не указан";
         
-        // Рассчитываем азимут и направление
+                // Рассчитываем азимут и направление
         const azimuth = calculateAzimuth(selectedLat, selectedLng, result.latitude, result.longitude);
         const direction = getDirection(azimuth);
 
@@ -350,3 +355,63 @@ function determineType(name) {
     }
     return "Неизвестно";
 }
+
+// Функция для выбора параметров поиска
+document.getElementById("selectParams").addEventListener("click", () => {
+    if (availableParams.length === 0) {
+        alert("Все параметры уже выбраны.");
+        return;
+    }
+
+    // Создаем модальное окно для выбора параметров
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "50%";
+    modal.style.left = "50%";
+    modal.style.transform = "translate(-50%, -50%)";
+    modal.style.backgroundColor = "white";
+    modal.style.padding = "20px";
+    modal.style.border = "1px solid #ccc";
+    modal.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.1)";
+    modal.style.zIndex = "1000";
+
+    // Добавляем заголовок
+    const title = document.createElement("h3");
+    title.textContent = "Выберите параметр поиска:";
+    modal.appendChild(title);
+
+    // Добавляем кнопки для каждого доступного параметра
+    availableParams.forEach(param => {
+        const button = document.createElement("button");
+        button.textContent = param;
+        button.style.margin = "5px";
+        button.style.padding = "10px";
+        button.style.cursor = "pointer";
+        button.addEventListener("click", () => {
+            selectedParams.push(param); // Добавляем выбранный параметр
+            availableParams = availableParams.filter(p => p !== param); // Удаляем его из доступных
+            updateParamsDisplay(); // Обновляем отображение выбранных параметров
+            document.body.removeChild(modal); // Закрываем модальное окно
+        });
+        modal.appendChild(button);
+    });
+
+    // Добавляем модальное окно на страницу
+    document.body.appendChild(modal);
+});
+
+// Функция для сброса параметров поиска
+document.getElementById("resetParams").addEventListener("click", () => {
+    selectedParams = []; // Очищаем выбранные параметры
+    availableParams = ["школа", "сад", "лагерь"]; // Восстанавливаем доступные параметры
+    updateParamsDisplay(); // Обновляем отображение
+});
+
+// Функция для обновления отображения выбранных параметров
+function updateParamsDisplay() {
+    const paramsDisplay = document.getElementById("paramsDisplay");
+    paramsDisplay.textContent = selectedParams.join(", ") || "Нет выбранных параметров";
+}
+
+// Инициализация отображения параметров при загрузке страницы
+updateParamsDisplay();
