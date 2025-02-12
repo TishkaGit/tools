@@ -257,15 +257,11 @@ function displayResults(results) {
         // Добавляем стрелочку направления после расстояния
         const distanceWithArrow = `${distance} км ${direction.emoji}`;
 
-        // Получаем телефон и email из данных API
-        const phone = result.phone || "Не указан";
-        const email = result.email || "Не указан";
-
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
-            <td>${phone}</td>
-            <td>${email}</td>
+            <td>${result.phone || "Не указан"}</td>
+            <td>${result.email || "Не указан"}</td>
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
