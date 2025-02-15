@@ -270,34 +270,35 @@ function exportToCSV(data) {
     link.click(); // Автоматическое скачивание файла
     document.body.removeChild(link);
 }
+// Функция для парсинга телефона и email из HTML
+function parseContacts(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
 
-// Функция для отображения результатов
-function displayResults(results) {
+    // Ищем в правой верхней части сайта (например, в header)
+    const header = doc.querySelector("header");
+    const contacts = header ? header.innerHTML : doc.body.innerHTML;
+
+    // Регулярные выражения для поиска телефона и email
+    const phoneRegex = /(\+7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/g;
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+    // Поиск телефонов и email
+    const phones = contacts.match(phoneRegex) || [];
+    const emails = contacts.match(emailRegex) || [];
+
+    return {
+        phones: [...new Set(phones)], // Убираем дубликаты
+        emails: [...new Set(emails)]  // Убираем дубликаты
+    };
+}
+
+async function displayResults(results) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
 
     if (!results || results.length === 0) {
         resultsDiv.innerHTML = "<p>Данные не найдены.</p>";
-        return;
-    }
-
-    const filteredResults = results.filter(result => {
-        const name = result.name.toLowerCase();
-        const excludeWords = [
-            "автошкола", "колледж", "университет", "институт", "техникум",
-            "вуз", "академия", "училище", "авто", "спортивная школа",
-            "музыкальная школа", "художественная школа", "фотоальбом",
-            "фотостудия", "фото", "альбом", "фотограф", "фотосъемка",
-            "фотоуслуги", "фотосессия", "видеосъемка"
-        ];
-        const includeWords = selectedParams.length > 0 ? selectedParams : ["школа", "сад", "лагерь"];
-
-        return !excludeWords.some(word => name.includes(word)) &&
-               includeWords.some(word => name.includes(word));
-    });
-
-    if (filteredResults.length === 0) {
-        resultsDiv.innerHTML = "<p>Подходящие учреждения не найдены.</p>";
         return;
     }
 
@@ -315,30 +316,35 @@ function displayResults(results) {
         </tr>
     `;
 
-    filteredResults.forEach(result => {
+    for (const result of results) {
         const row = document.createElement("tr");
         const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude).toFixed(2);
         const website = result.website ? `<a href="${result.website}" target="_blank">${result.website}</a>` : "Не указан";
-        
-                // Рассчитываем азимут и направление
-        const azimuth = calculateAzimuth(selectedLat, selectedLng, result.latitude, result.longitude);
-        const direction = getDirection(azimuth);
 
-        // Добавляем стрелочку направления после расстояния
-        const distanceWithArrow = `${distance} км ${direction.emoji}`;
+        // Парсим контакты с сайта, если есть сайт
+        let phone = result.phone || "Не указан";
+        let email = result.email || "Не указан";
+        if (result.website) {
+            const html = await fetchWebsiteContent(result.website);
+            if (html) {
+                const contacts = parseContacts(html);
+                phone = contacts.phones.join(", ") || phone;
+                email = contacts.emails.join(", ") || email;
+            }
+        }
 
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
-            <td>${result.phone || "Не указан"}</td>
-            <td>${result.email || "Не указан"}</td>
+            <td>${phone}</td>
+            <td>${email}</td>
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
-            <td>${distanceWithArrow}</td>
+            <td>${distance} км</td>
         `;
         table.appendChild(row);
-    });
+    }
 
     resultsDiv.appendChild(table);
 }
