@@ -314,6 +314,21 @@ async function displayResults(results) {
         resultsDiv.innerHTML = "<p>Данные не найдены.</p>";
         return;
     }
+       const filteredResults = results.filter(result => {
+        const name = result.name.toLowerCase();
+        const excludeWords = [
+            "автошкола", "колледж", "университет", "институт", "техникум",
+            "вуз", "академия", "училище", "авто", "спортивная школа",
+            "музыкальная школа", "художественная школа", "фотоальбом",
+            "фотостудия", "фото", "альбом", "фотограф", "фотосъемка",
+            "фотоуслуги", "фотосессия", "видеосъемка"
+        ];
+        const includeWords = selectedParams.length > 0 ? selectedParams : ["школа", "сад", "лагерь"];
+
+        return !excludeWords.some(word => name.includes(word)) &&
+               includeWords.some(word => name.includes(word));
+    });
+
 
     const table = document.createElement("table");
     table.innerHTML = `
