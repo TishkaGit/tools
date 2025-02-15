@@ -96,16 +96,3 @@ th, td {
 th {
     background-color: #f8f9fa;
 }
-#paramsDisplay span {
-    margin-right: 10px;
-    display: inline-block;
-    padding: 5px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-}
-
-#paramsDisplay span span {
-    cursor: pointer;
-    color: red;
-    margin-left: 5px;
-}
