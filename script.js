@@ -270,6 +270,18 @@ function exportToCSV(data) {
     link.click(); // Автоматическое скачивание файла
     document.body.removeChild(link);
 }
+// Функция для загрузки HTML сайта
+async function fetchWebsiteContent(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Ошибка загрузки сайта: ${response.statusText}`);
+        return await response.text();
+    } catch (error) {
+        console.error("Ошибка при загрузке сайта:", error);
+        return null;
+    }
+}
+
 // Функция для парсинга телефона и email из HTML
 function parseContacts(html) {
     const parser = new DOMParser();
@@ -293,6 +305,7 @@ function parseContacts(html) {
     };
 }
 
+// Функция для отображения результатов
 async function displayResults(results) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
@@ -325,7 +338,7 @@ async function displayResults(results) {
         let phone = result.phone || "Не указан";
         let email = result.email || "Не указан";
         if (result.website) {
-            const html = await fetchWebsiteContent(result.website);
+            const html = await fetchWebsiteContent(result.website); // Вызов функции
             if (html) {
                 const contacts = parseContacts(html);
                 phone = contacts.phones.join(", ") || phone;
