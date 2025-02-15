@@ -356,6 +356,53 @@ function determineType(name) {
     return "Неизвестно";
 }
 
+let selectedParams = ["школа", "сад", "лагерь"]; // По умолчанию выбраны все параметры
+let availableParams = []; // Изначально доступных параметров нет
+
+// Функция для обновления отображения выбранных параметров
+function updateParamsDisplay() {
+    const paramsDisplay = document.getElementById("paramsDisplay");
+    paramsDisplay.innerHTML = ""; // Очищаем текущее отображение
+
+    selectedParams.forEach(param => {
+        const paramElement = document.createElement("span");
+        paramElement.style.marginRight = "10px";
+        paramElement.style.display = "inline-block";
+        paramElement.style.padding = "5px";
+        paramElement.style.backgroundColor = "#f0f0f0";
+        paramElement.style.borderRadius = "5px";
+
+        // Текст параметра
+        const paramText = document.createElement("span");
+        paramText.textContent = param;
+        paramElement.appendChild(paramText);
+
+        // Крестик для удаления
+        const removeButton = document.createElement("span");
+        removeButton.textContent = " ❌";
+        removeButton.style.cursor = "pointer";
+        removeButton.style.color = "red";
+        removeButton.addEventListener("click", () => {
+            removeParam(param); // Удаляем параметр
+        });
+        paramElement.appendChild(removeButton);
+
+        paramsDisplay.appendChild(paramElement);
+    });
+
+    // Если параметров нет, отображаем сообщение
+    if (selectedParams.length === 0) {
+        paramsDisplay.textContent = "Нет выбранных параметров";
+    }
+}
+
+// Функция для удаления параметра
+function removeParam(param) {
+    selectedParams = selectedParams.filter(p => p !== param); // Удаляем параметр из выбранных
+    availableParams.push(param); // Возвращаем параметр в доступные
+    updateParamsDisplay(); // Обновляем отображение
+}
+
 // Функция для выбора параметров поиска
 document.getElementById("selectParams").addEventListener("click", () => {
     if (availableParams.length === 0) {
@@ -402,16 +449,10 @@ document.getElementById("selectParams").addEventListener("click", () => {
 
 // Функция для сброса параметров поиска
 document.getElementById("resetParams").addEventListener("click", () => {
-    selectedParams = []; // Очищаем выбранные параметры
-    availableParams = ["школа", "сад", "лагерь"]; // Восстанавливаем доступные параметры
+    selectedParams = ["школа", "сад", "лагерь"]; // Восстанавливаем все параметры
+    availableParams = []; // Очищаем доступные параметры
     updateParamsDisplay(); // Обновляем отображение
 });
-
-// Функция для обновления отображения выбранных параметров
-function updateParamsDisplay() {
-    const paramsDisplay = document.getElementById("paramsDisplay");
-    paramsDisplay.textContent = selectedParams.join(", ") || "Нет выбранных параметров";
-}
 
 // Инициализация отображения параметров при загрузке страницы
 updateParamsDisplay();
