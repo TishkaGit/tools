@@ -375,7 +375,12 @@ async function displayResults(results) {
                 email = contacts.emails.join(", ") || email;
             }
         }
+                // Рассчитываем азимут и направление
+        const azimuth = calculateAzimuth(selectedLat, selectedLng, result.latitude, result.longitude);
+        const direction = getDirection(azimuth);
 
+        // Добавляем стрелочку направления после расстояния
+        const distanceWithArrow = `${distance} км ${direction.emoji}`;
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${result.name}</td>
