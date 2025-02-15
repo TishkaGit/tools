@@ -5,8 +5,8 @@ let selectedLat = 55.808234713666174; // Начальные координаты
 let selectedLng = 38.43791868793516;
 let currentZoom = 13; // Начальный уровень зума
 let currentData = []; // Для хранения данных
-let selectedParams = []; // Выбранные параметры поиска
-let availableParams = ["школа", "сад", "лагерь"]; // Доступные параметры
+let selectedParams = ["школа", "сад", "лагерь"]; // По умолчанию выбраны все параметры
+let availableParams = []; // Изначально доступных параметров нет
 
 // Инициализация карты
 function initMap() {
@@ -355,9 +355,6 @@ function determineType(name) {
     }
     return "Неизвестно";
 }
-
-let selectedParams = ["школа", "сад", "лагерь"]; // По умолчанию выбраны все параметры
-let availableParams = []; // Изначально доступных параметров нет
 
 // Функция для обновления отображения выбранных параметров
 function updateParamsDisplay() {
