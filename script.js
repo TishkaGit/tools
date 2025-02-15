@@ -329,16 +329,26 @@ async function displayResults(results) {
         </tr>
     `;
 
+    // Получаем радиус поиска в километрах
+    const radiusInput = document.getElementById("radius");
+    const radiusKm = parseFloat(radiusInput.value);
+
     for (const result of results) {
-        const row = document.createElement("tr");
-        const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude).toFixed(2);
+        // Рассчитываем расстояние до учреждения
+        const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude);
+
+        // Пропускаем учреждения, которые находятся за пределами радиуса
+        if (distance > radiusKm) {
+            continue; // Пропустить эту итерацию цикла
+        }
+
         const website = result.website ? `<a href="${result.website}" target="_blank">${result.website}</a>` : "Не указан";
 
         // Парсим контакты с сайта, если есть сайт
         let phone = result.phone || "Не указан";
         let email = result.email || "Не указан";
         if (result.website) {
-            const html = await fetchWebsiteContent(result.website); // Вызов функции
+            const html = await fetchWebsiteContent(result.website);
             if (html) {
                 const contacts = parseContacts(html);
                 phone = contacts.phones.join(", ") || phone;
@@ -346,6 +356,7 @@ async function displayResults(results) {
             }
         }
 
+        const row = document.createElement("tr");
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
@@ -354,14 +365,13 @@ async function displayResults(results) {
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
-            <td>${distance} км</td>
+            <td>${distance.toFixed(2)} км</td>
         `;
         table.appendChild(row);
     }
 
     resultsDiv.appendChild(table);
 }
-
 // Функция для определения типа учреждения
 function determineType(name) {
     const nameLower = name.toLowerCase();
