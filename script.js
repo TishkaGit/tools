@@ -329,6 +329,10 @@ async function displayResults(results) {
         return !excludeWords.some(word => name.includes(word)) &&
                includeWords.some(word => name.includes(word));
     });
+        if (filteredResults.length === 0) {
+        resultsDiv.innerHTML = "<p>Подходящие учреждения не найдены.</p>";
+        return;
+    }
 
 
     const table = document.createElement("table");
