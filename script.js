@@ -201,7 +201,7 @@ function getDirection(azimuth) {
 document.getElementById("fetchData").addEventListener("click", async () => {
     const apiUrl = "https://local-business-data.p.rapidapi.com/search";
     const headers = {
-        "x-rapidapi-key": "ad55ac066emshfbfeb2df67cde49p17f4fcjsnee711253aa4f", // Новый API-ключ
+        "x-rapidapi-key": "992552b12amsh319a18af82ce816p18154djsnb", // Новый API-ключ
         "x-rapidapi-host": "local-business-data.p.rapidapi.com"
     };
 
