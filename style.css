@@ -92,6 +92,25 @@ th, td {
     border: 1px solid #ddd;
     text-align: left;
 }
+#drawControls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#drawControls button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#drawControls button:hover {
+    background-color: #0056b3;
+}
 
 th {
     background-color: #f8f9fa;
