@@ -14,7 +14,7 @@ let availableParams = []; // Изначально доступных парам�
 function initMap() {
     map = L.map('map').setView([selectedLat, selectedLng], currentZoom);
     map.addLayer(drawnItems); // Добавляем группу на карту
-    // Инициализация Leaflet Draw
+  // Инициализация Leaflet Draw без стандартных кнопок
 const drawControl = new L.Control.Draw({
     draw: {
         polygon: {
@@ -22,17 +22,39 @@ const drawControl = new L.Control.Draw({
                 color: '#007bff',
                 fillOpacity: 0.2
             },
-            allowIntersection: false, // Запрещаем пересечение сторон
-            showArea: true // Показываем площадь фигуры
+            allowIntersection: false,
+            showArea: true
         },
-        circle: false, // Отключаем круг
-        rectangle: false, // Отключаем прямоугольник
-        marker: false // Отключаем маркер
+        circle: false,
+        rectangle: false,
+        marker: false
     },
     edit: {
-        featureGroup: drawnItems // Редактируем фигуры в этой группе
+        featureGroup: drawnItems
     }
 });
+
+// Отключаем стандартные кнопки Leaflet Draw
+drawControl.options.draw.polygon.showControl = false;
+drawControl.options.edit.edit = false;
+drawControl.options.edit.remove = false;
+
+// Добавляем обработчики для новых кнопок
+document.getElementById("drawPolygon").addEventListener("click", () => {
+    new L.Draw.Polygon(map, drawControl.options.draw.polygon).enable();
+});
+
+document.getElementById("editShape").addEventListener("click", () => {
+    new L.EditToolbar.Edit(map, {
+        featureGroup: drawnItems
+    }).enable();
+});
+
+document.getElementById("deleteShape").addEventListener("click", () => {
+    new L.EditToolbar.Delete(map, {
+        featureGroup: drawnItems
+    }).enable();
+}); 
 map.addControl(drawControl); // Добавляем инструменты рисования на карту
     // Обработчик события создания фигуры
 map.on(L.Draw.Event.CREATED, function (event) {
