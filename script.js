@@ -1,3 +1,6 @@
+let polygon = null; // Текущий многоугольник поиска
+let drawnItems = new L.FeatureGroup(); // Группа для хранения фигур
+map.addLayer(drawnItems); // Добавляем группу на карту
 let map;
 let marker;
 let circle; // Круг для отображения радиуса
