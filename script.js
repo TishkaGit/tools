@@ -1,6 +1,5 @@
 let polygon = null; // Текущий многоугольник поиска
 let drawnItems = new L.FeatureGroup(); // Группа для хранения фигур
-map.addLayer(drawnItems); // Добавляем группу на карту
 let map;
 let marker;
 let circle; // Круг для отображения радиуса
@@ -14,6 +13,50 @@ let availableParams = []; // Изначально доступных парам�
 // Инициализация карты
 function initMap() {
     map = L.map('map').setView([selectedLat, selectedLng], currentZoom);
+    map.addLayer(drawnItems); // Добавляем группу на карту
+    // Инициализация Leaflet Draw
+const drawControl = new L.Control.Draw({
+    draw: {
+        polygon: {
+            shapeOptions: {
+                color: '#007bff',
+                fillOpacity: 0.2
+            },
+            allowIntersection: false, // Запрещаем пересечение сторон
+            showArea: true // Показываем площадь фигуры
+        },
+        circle: false, // Отключаем круг
+        rectangle: false, // Отключаем прямоугольник
+        marker: false // Отключаем маркер
+    },
+    edit: {
+        featureGroup: drawnItems // Редактируем фигуры в этой группе
+    }
+});
+map.addControl(drawControl); // Добавляем инструменты рисования на карту
+    // Обработчик события создания фигуры
+map.on(L.Draw.Event.CREATED, function (event) {
+    const layer = event.layer;
+    drawnItems.addLayer(layer); // Добавляем фигуру на карту
+    polygon = layer; // Сохраняем текущий многоугольник
+    updateSearchArea(layer); // Обновляем область поиска
+});
+
+// Обработчик события редактирования фигуры
+map.on(L.Draw.Event.EDITED, function (event) {
+    const layers = event.layers;
+    layers.eachLayer(function (layer) {
+        polygon = layer; // Обновляем текущий многоугольник
+        updateSearchArea(layer); // Обновляем область поиска
+    });
+});
+
+// Обработчик события удаления фигуры
+map.on(L.Draw.Event.DELETED, function (event) {
+    drawnItems.clearLayers(); // Очищаем фигуры
+    polygon = null; // Сбрасываем текущий многоугольник
+    updateSearchArea(null); // Сбрасываем область поиска
+});
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -162,6 +205,28 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Расстояние в км
 }
+// Обновляем область поиска
+function updateSearchArea(layer) {
+    if (layer) {
+        searchArea = layer.getLatLngs()[0]; // Получаем координаты фигуры
+    } else {
+        searchArea = null; // Сбрасываем область поиска
+    }
+    displayResults(currentData); // Обновляем результаты
+}
+// Функция для проверки, находится ли точка внутри многоугольника
+function isPointInPolygon(point, polygon) {
+    const x = point.lat, y = point.lng;
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].lat, yi = polygon[i].lng;
+        const xj = polygon[j].lat, yj = polygon[j].lng;
+        const intersect = ((yi > y) !== (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
 
 // Функция для расчета азимута между двумя точками
 function calculateAzimuth(lat1, lon1, lat2, lon2) {
@@ -308,7 +373,6 @@ function parseContacts(html) {
     };
 }
 
-// Функция для отображения результатов
 async function displayResults(results) {
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
@@ -317,26 +381,6 @@ async function displayResults(results) {
         resultsDiv.innerHTML = "<p>Данные не найдены.</p>";
         return;
     }
-       const filteredResults = results.filter(result => {
-        const name = result.name.toLowerCase();
-        const excludeWords = [
-            "автошкола", "колледж", "университет", "институт", "техникум",
-            "вуз", "академия", "училище", "авто", "спортивная школа",
-            "музыкальная школа", "художественная школа", "фотоальбом",
-            "фотостудия", "фото", "альбом", "фотограф", "фотосъемка",
-            "фотоуслуги", "фотосессия", "видеосъемка", "языковая", "лингвистическая",
-            "лингва"
-        ];
-        const includeWords = selectedParams.length > 0 ? selectedParams : ["школа", "сад", "лагерь"];
-
-        return !excludeWords.some(word => name.includes(word)) &&
-               includeWords.some(word => name.includes(word));
-    });
-        if (filteredResults.length === 0) {
-        resultsDiv.innerHTML = "<p>Подходящие учреждения не найдены.</p>";
-        return;
-    }
-
 
     const table = document.createElement("table");
     table.innerHTML = `
@@ -352,44 +396,23 @@ async function displayResults(results) {
         </tr>
     `;
 
-    // Получаем радиус поиска в километрах
-    const radiusInput = document.getElementById("radius");
-    const radiusKm = parseFloat(radiusInput.value);
-
     for (const result of results) {
-        // Рассчитываем расстояние до учреждения
-        const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude);
+        const point = { lat: result.latitude, lng: result.longitude };
 
-        // Пропускаем учреждения, которые находятся за пределами радиуса
-        if (distance > radiusKm) {
-            continue; // Пропустить эту итерацию цикла
+        // Проверяем, находится ли организация внутри фигуры поиска
+        if (searchArea && !isPointInPolygon(point, searchArea)) {
+            continue; // Пропускаем организации за пределами фигуры
         }
 
+        const distance = calculateDistance(selectedLat, selectedLng, result.latitude, result.longitude);
         const website = result.website ? `<a href="${result.website}" target="_blank">${result.website}</a>` : "Не указан";
 
-        // Парсим контакты с сайта, если есть сайт
-        let phone = result.phone || "Не указан";
-        let email = result.email || "Не указан";
-        if (result.website) {
-            const html = await fetchWebsiteContent(result.website);
-            if (html) {
-                const contacts = parseContacts(html);
-                phone = contacts.phones.join(", ") || phone;
-                email = contacts.emails.join(", ") || email;
-            }
-        }
-                // Рассчитываем азимут и направление
-        const azimuth = calculateAzimuth(selectedLat, selectedLng, result.latitude, result.longitude);
-        const direction = getDirection(azimuth);
-
-        // Добавляем стрелочку направления после расстояния
-        const distanceWithArrow = `${distance} км ${direction.emoji}`;
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${result.name}</td>
             <td>${result.full_address || "Не указан"}</td>
-            <td>${phone}</td>
-            <td>${email}</td>
+            <td>${result.phone || "Не указан"}</td>
+            <td>${result.email || "Не указан"}</td>
             <td>${website}</td>
             <td>${determineType(result.name)}</td>
             <td>${result.city || "Не указан"}</td>
@@ -506,6 +529,10 @@ document.getElementById("resetParams").addEventListener("click", () => {
     selectedParams = ["школа", "сад", "лагерь"]; // Восстанавливаем все параметры
     availableParams = []; // Очищаем доступные параметры
     updateParamsDisplay(); // Обновляем отображение
+});
+document.getElementById("drawPolygon").addEventListener("click", () => {
+    // Активируем режим рисования многоугольника
+    new L.Draw.Polygon(map, drawControl.options.draw.polygon).enable();
 });
 
 // Инициализация отображения параметров при загрузке страницы
