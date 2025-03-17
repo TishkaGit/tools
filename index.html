@@ -9,6 +9,9 @@
 </head>
 <body>
     <div class="container">
+        <!-- Кнопка "Импорт в Битрикс" -->
+        <a href="https://veselayamylovarnya.bitrix24.ru/crm/company/import/" id="bitrixImportButton" class="bitrix-button">Импорт в Битрикс</a>
+
         <h1>Поиск школ садов и лагерей</h1>
         <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
         
@@ -28,16 +31,13 @@
             </div>
 
             <!-- Блок для кнопок управления рисованием -->
-            <div id="drawControls" style="margin-bottom: 20px;">
-                <button id="drawPolygon" title="Нарисовать многоугольник">Нарисовать многоугольник</button>
-                <button id="editShape" title="Редактировать фигуру">Редактировать фигуру</button>
-                <button id="deleteShape" title="Удалить фигуру">Удалить фигуру</button>
+            <div id="drawControls" class="control-group">
+                <button id="drawPolygon" data-tooltip="Нарисовать многоугольник">Нарисовать многоугольник</button>
+                <button id="editShape" data-tooltip="Редактировать фигуру">Редактировать фигуру</button>
+                <button id="deleteShape" data-tooltip="Удалить фигуру">Удалить фигуру</button>
             </div>
-           <div id="drawControls" style="margin-bottom: 20px;">
-            <button id="drawPolygon" data-tooltip="Нарисовать многоугольник">Нарисовать многоугольник</button>
-            <button id="editShape" data-tooltip="Редактировать фигуру">Редактировать фигуру</button>
-            <button id="deleteShape" data-tooltip="Удалить фигуру">Удалить фигуру</button>
         </div>
+
         <!-- Кнопка выбора параметров поиска -->
         <div class="controls">
             <button id="selectParams">Выбрать параметры поиска</button>
@@ -45,11 +45,12 @@
         </div>
 
         <!-- Окошко для отображения выбранных параметров -->
-        <div id="selectedParams" style="margin-bottom: 20px;">
+        <div id="selectedParams" class="control-group">
             <strong>Выбранные параметры:</strong>
             <div id="paramsDisplay"></div>
         </div>
 
+        <!-- Сообщение об ошибке -->
         <p id="error" style="color: red; display: none;"></p>
 
         <!-- Кнопки -->
@@ -58,10 +59,13 @@
             <button id="downloadCSV" disabled>Скачать CSV</button>
         </div>
 
+        <!-- Результаты поиска -->
         <div id="results"></div>
     </div>
+
+    <!-- Подключение скриптов -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script> <!-- Подключаем Leaflet Draw -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
